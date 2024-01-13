@@ -1,0 +1,14 @@
+  <div class="card mb-3" style="width: 18rem;height: 40rem;">
+    <h5 class="card-header">{{book.title}}</h5>
+    <div class="card-body">
+       <div *ngIf="coverPreview">
+         <img [src]="coverPreview" alt="Book Cover" style="max-width: 17.5rem; max-height: 200px;">
+       </div>
+      <h5 class="card-title mt-3">{{book.description}}</h5>
+      <p class="card-text">Authors: <small class="text-body-secondary">{{selectedAuthors}}</small></p>
+    </div>
+    <div class="card-footer text-body-secondary">
+      <button type="button" class="btn btn-danger" (click)="deleteBook()">Delete</button>
+      <button type="button" class="btn btn-primary ms-3" [routerLink]="['/edit-book-component', book.id]">Edit</button>
+    </div>
+  </div>

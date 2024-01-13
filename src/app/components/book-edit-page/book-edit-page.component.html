@@ -1,0 +1,25 @@
+<div class="row">
+    <div class="col-4"></div>
+    <div class="col-4">
+        <form  #bookForm="ngForm" (ngSubmit)="onSubmit(bookForm)" *ngIf="book">
+            <div class="mb-3" *ngIf="book.title">
+              <label for="exampleInputEmail1" class="form-label">Title</label>
+              <input type="text" class="form-control" id="title" name="title" [(ngModel)]="book.title">
+            </div>
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label">Description</label>
+              <input type="text" class="form-control" id="description" name="description" [(ngModel)]="book.description">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputPassword1" class="form-label">Authors</label>
+                <ng-select required [dropdownPosition]="'top'" [multiple]="true" [(ngModel)]="selectedAuthors" name="authors" style="height: auto;">
+                    <ng-option *ngFor="let author of authors" [value]="author.name">{{author.name}}</ng-option>
+                </ng-select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+    </div>
+    <div class="col-4"></div>
+</div>
+

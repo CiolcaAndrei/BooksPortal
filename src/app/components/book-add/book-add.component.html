@@ -1,0 +1,41 @@
+<div class="row">
+    <div class="col-4"></div>
+    <div class="col-4">
+        <form #bookForm="ngForm" (ngSubmit)="onSubmit()" class="mt-5" *ngIf="book">
+            <div class="mb-3">
+              <label for="cover">Cover:</label>
+              <input type="file" id="cover" name="cover" accept="image/*" (change)="onCoverChange($event)" required>
+  
+              <img *ngIf="coverPreview" [src]="coverPreview" alt="Cover Preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;">
+
+            </div>
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Title</label>
+              <input type="text" class="form-control" id="title" required maxlength="100" name="title" [(ngModel)]="book.title" >
+              <div *ngIf="bookForm.controls['title'].touched && bookForm.controls['title'].invalid">
+                <span style="color: red;">Title is required</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label">Description</label>
+              <input type="text" class="form-control" id="description" required maxlength="200" name="description"  [(ngModel)]="book.description">
+              <div *ngIf="bookForm.controls['description'].touched && bookForm.controls['description'].invalid">
+                <span style="color: red;">Description is required</span>
+              </div>
+            </div>
+            
+
+            <div class="mb-3">
+                <label for="exampleInputPassword1" class="form-label">Authors</label>
+                <ng-select required [dropdownPosition]="'top'" [multiple]="true" [(ngModel)]="selectedAuthors" name="authors" style="height: auto;">
+                    <ng-option *ngFor="let author of authors" [value]="author">{{author.name}}</ng-option>
+                </ng-select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" [disabled]="!bookForm.valid">Submit</button>
+          </form>
+    </div>
+    <div class="col-4"></div>
+</div>
+
