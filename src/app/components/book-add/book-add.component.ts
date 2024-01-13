@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Author } from 'src/app/models/author';
-import { Book } from 'src/app/models/book';
 import { AuthorService } from 'src/app/services/author.service';
 import { BookService } from 'src/app/services/book.service';
 import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
 import { Router } from '@angular/router';
+import { BookDTO } from 'src/app/models/bookDTO';
+import { AuthorDTO } from 'src/app/models/authorDTO';
 
 @Component({
   selector: 'app-book-add',
@@ -13,23 +13,21 @@ import { Router } from '@angular/router';
   styleUrls: ['./book-add.component.scss']
 })
 export class BookAddComponent {
-  book: Book;
-  authors!: Array<Author>;
+  book: BookDTO;
+  authors!: Array<AuthorDTO>;
   coverPreview?: string | ArrayBuffer;
-
-  selectedAuthors!: Array<Author>
 
   constructor(private bookService: BookService, private authorService: AuthorService,private dialog: MatDialog,private router: Router) {
     this.authorService.getAuthors().subscribe(
       (data) => this.authors = data
     )
 
-    this.book = new Book();
+    this.book = new BookDTO();
     this.book.id = 0;
     this.book.coverPath = '';
     this.book.title = '';
     this.book.description = '';
-    this.book.authorBooks = [];
+    this.book.authors = [];
   }
 
   onCoverChange(event: any) {
@@ -42,16 +40,11 @@ export class BookAddComponent {
 
       reader.readAsDataURL(input.files[0]);
 
-      // Store the selected file in the Book entity
       this.book.coverPath = input.files[0];
     }
   }
 
   onSubmit() {
-    this.selectedAuthors.map(a => {
-      this.book.authorBooks?.push({author: a});
-    })
-
     if (this.book.coverPath)
     {
           const formData = new FormData();

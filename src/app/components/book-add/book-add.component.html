@@ -28,7 +28,7 @@
 
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Authors</label>
-                <ng-select required [dropdownPosition]="'top'" [multiple]="true" [(ngModel)]="selectedAuthors" name="authors" style="height: auto;">
+                <ng-select required [dropdownPosition]="'top'" [multiple]="true" [(ngModel)]="book.authors" name="authors" style="height: auto;">
                     <ng-option *ngFor="let author of authors" [value]="author">{{author.name}}</ng-option>
                 </ng-select>
             </div>

@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Author } from 'src/app/models/author';
-import { Book } from 'src/app/models/book';
 import { AuthorService } from 'src/app/services/author.service';
 import { BookService } from 'src/app/services/book.service';
 import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
+import { AuthorDTO } from 'src/app/models/authorDTO';
+import { BookDTO } from 'src/app/models/bookDTO';
 
 @Component({
   selector: 'app-book-edit-page',
@@ -14,11 +14,13 @@ import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
 })
 export class BookEditPageComponent {
   id?: string | null;
-  authors!: Array<Author>;
-  book!: Book;
+  authors!: Array<AuthorDTO>;
+  book!: BookDTO;
   selectedAuthors?: Array<string | undefined>;
+  coverPreview?: string | ArrayBuffer;
+  initialCoverPath?: string;
 
-  constructor(private bookService: BookService, private authorService: AuthorService,private activeRoute: ActivatedRoute, private router: Router, private dialog: MatDialog) {
+  constructor(private bookService: BookService, private authorService: AuthorService, private activeRoute: ActivatedRoute, private router: Router, private dialog: MatDialog) {
 
     this.authorService.getAuthors().subscribe(
       (data) => this.authors = data
@@ -26,37 +28,75 @@ export class BookEditPageComponent {
 
     this.id = this.activeRoute.snapshot.paramMap.get('id');
 
-    if (this.id != null)
-    {
-        this.bookService.getById(+this.id).subscribe(
-          (data) => {
-            this.book = data;
-            console.log(this.book.authorBooks);
-            this.selectedAuthors = this.book.authorBooks?.map(a => a.author).map(a => a?.name);
-          }
-        )
-    }
+    if (this.id != null) {
+      this.bookService.getById(+this.id).subscribe(
+        (data) => {
+          this.book = data;
+          this.selectedAuthors = this.book.authors?.map(a => a.name);
+          this.initialCoverPath = this.book.coverPath;
 
+          this.bookService.getCover(this.book.coverPath).subscribe((data: ArrayBuffer) => {
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+              this.coverPreview = e.target.result;
+              this.book
+            };
+            reader.readAsDataURL(new Blob([data]));
+          });
+        }
+      )
+    }
+  }
+
+  onCoverChange(event: any) {
+    const input = event.target;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.coverPreview = e.target.result;
+      };
+
+      reader.readAsDataURL(input.files[0]);
+
+      this.book.coverPath = input.files[0];
+    }
+  }
+
+  updateBook() {
+    this.bookService.update(this.book).subscribe(
+      (data) => {
+        let dialogRef = this.dialog.open(DialogBoxComponent, { data: { message: 'The book was edited succesfully !' } });
+
+        dialogRef.afterClosed().subscribe(result => {
+          this.router.navigate(['book-viewer']);
+        });
+      },
+      (error) => this.dialog.open(DialogBoxComponent, { data: { message: 'An errror occured. Please try again !' } }))
   }
 
   onSubmit(bookForm: any) {
-   
-   this.book.authorBooks?.splice(0);
 
-   this.authors.filter(a => this.selectedAuthors?.includes(a.name)).map(a => {
-        this.book.authorBooks?.push({author: a});
-   });
+    this.book.authors?.splice(0);
 
-   console.log(this.book.authorBooks);
+    this.authors.filter(a => this.selectedAuthors?.includes(a.name)).map(a => {
+      this.book.authors?.push(a);
+    });
 
-   this.bookService.update(this.book).subscribe(
-    (data) => {
-         let dialogRef = this.dialog.open(DialogBoxComponent, {data: { message: 'The book was edited succesfully !' }});
-        
-         dialogRef.afterClosed().subscribe(result => {
-                  this.router.navigate(['book-viewer']);
-          });},
-    (error) =>   this.dialog.open(DialogBoxComponent, {data: { message: 'An errror occured. Please try again !' }})
-   )
+    if (this.book.coverPath) {
+
+      if (this.book.coverPath != this.initialCoverPath) {
+        const formData = new FormData();
+        formData.append('cover', this.book.coverPath);
+
+        this.bookService.uploadCover(formData).subscribe(
+          (data) => {
+            this.book.coverPath = data.coverPath;
+            this.updateBook();
+          });
+      }
+      else {
+        this.updateBook();
+      }
+    }
   }
 }

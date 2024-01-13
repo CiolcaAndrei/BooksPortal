@@ -1,5 +1,5 @@
-import { Author } from "./author";
-import { Book } from "./book";
+import { Author } from "./authorDTO";
+import { Book } from "./bookDTO";
 
 export class AuthorBook{
     authorId?: number;
